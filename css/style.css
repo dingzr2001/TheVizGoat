@@ -321,6 +321,8 @@ a { color: var(--accent); }
   padding-right: 48vw;
 }
 .opener.left .caption { margin-left: 0; }
+/* Keeps the text in the clear middle when the art runs down both sides. */
+.band.art .opener.narrow { max-width: min(760px, 52vw); }
 .opener h2 {
   margin: 14px 0 0;
   font-family: var(--serif);
@@ -657,6 +659,7 @@ a { color: var(--accent); }
   }
   .band.art .opener, .chapter.page .band.art .opener { justify-content: flex-start; padding: 14vh 20px 56vh; }
   .band.art .opener.left { padding-left: 20px; padding-right: 20px; }
+  .band.art .opener.narrow { max-width: none; }
   .opener { padding: 12vh 16px 8vh; min-height: 70vh; }
   .scrolly { display: block; padding: 0; }
   .graphic {

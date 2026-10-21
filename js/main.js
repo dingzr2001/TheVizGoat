@@ -100,12 +100,13 @@ function buildChapter(slide, i) {
 
   const lede = slide.lede?.(data);
   // An illustrated opener fills the screen; its tone ("paper" or "navy") fixes the text colors to suit the art.
+  // Art with a transparent background has no tone and follows the page theme.
   const art = slide.art;
   const opener = slide.opener === false ? "" : `
-    <div class="band${art ? ` art ${art.tone}` : ""}">
+    <div class="band${art ? ` art${art.tone ? ` ${art.tone}` : ""}` : ""}">
       ${art ? `<div class="band-img" aria-hidden="true" style="background-image: url('${art.img}');
         --art-pos: ${art.position}; --art-pos-small: ${art.positionSmall}"></div>` : ""}
-      <header class="opener${art?.align === "left" ? " left" : ""}">
+      <header class="opener${art?.align && art.align !== "center" ? ` ${art.align}` : ""}">
         <div class="kicker">Chapter ${num(i)} · ${slide.kicker}</div>
         <h2>${slide.title}</h2>
         ${lede?.stat ? `<div class="stat">${lede.stat}</div>` : ""}

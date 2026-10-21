@@ -75,7 +75,9 @@ export default {
   // opener: false,            // optional: no title card (the intro uses the page's title instead)
   // layout: "page",           // optional: a plain page instead of a pinned chart (used by the conclusion)
   // art: { img: "img/cards.jpg", tone: "paper", align: "center",   // optional: full-screen illustrated title card;
-  //        position: "center", positionSmall: "right bottom" },    // tone "paper" or "navy" sets the text colors
+  //        position: "center", positionSmall: "right bottom" },    // tone "paper" or "navy" sets the text colors;
+  //                                                              // no tone (transparent art) follows the theme;
+  //                                                              // align "left" | "center" | "narrow"
   steps: [ "<p>html…</p>", (data) => `<p>text built from ${data}</p>` ],   // one text card each
   notes: "Shown under 'About this data'",
   mount({ viz, controls, text, data, ctx }) {

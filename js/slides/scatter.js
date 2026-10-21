@@ -51,8 +51,10 @@ export default {
   nav: "Volume vs accuracy",
   kicker: "Message 4 · The core question",
   title: "Do teams that shoot more threes win more?",
-  lede: () => ({
-    caption: `One season, thirty teams, and two ways to measure their three-point shooting:
+  art: { img: "img/teams.webp", align: "narrow", position: "center", positionSmall: "left bottom" },
+  lede: (d) => ({
+    stat: `${seasonTeams(d, LATEST).length}<small>teams</small>`,
+    caption: `One season, and two ways to measure their three-point shooting:
       how <em>often</em> they shoot from three, and how <em>well</em>.`,
   }),
   steps: [
