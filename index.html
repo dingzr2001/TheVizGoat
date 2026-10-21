@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shoot More, Win More?</title>
+  <meta name="description" content="An interactive story about the NBA's three-point revolution: does shooting more threes mean winning more games?">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23eb6834'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="#top">Shoot More, Win More?</a>
+    <span class="current" id="current" aria-live="polite"></span>
+    <button class="text-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="menu">Chapters</button>
+    <button class="text-btn" id="theme" type="button" title="Switch light / dark">◐</button>
+    <div class="progress" aria-hidden="true"><span></span></div>
+  </header>
+  <nav class="menu" id="menu" aria-label="Chapters" hidden></nav>
+
+  <main id="story">
+    <section class="hero paper" id="top">
+      <div class="hero-inner">
+        <p class="eyebrow">An NBA data story · 1979-80 to 2025-26</p>
+        <h1>Shoot more, <em>win more?</em></h1>
+        <p class="dek" data-dek>The three-pointer took over basketball. But does taking more of them actually win games?</p>
+        <p class="byline">By TheVizG.O.A.T · Kunhao Ni, Qixiang (David) Fan, Yurun Zhu, Zhaorui Ding, Jun Woo Beck · CS 6730</p>
+      </div>
+      <div class="scroll-cue" aria-hidden="true">Scroll to begin<span>↓</span></div>
+    </section>
+  </main>
+
+  <footer class="colophon">
+    <p><strong>Shoot More, Win More?</strong> · CS 6730 Data Visualization · Team TheVizG.O.A.T</p>
+    <p>Data: Basketball-Reference via the Kaggle dataset
+      <a href="https://www.kaggle.com/datasets/sumitrodatta/nba-aba-baa-stats" target="_blank" rel="noopener">NBA Stats (1947-present)</a>;
+      shot locations from NBA.com via
+      <a href="https://github.com/DomSamangy/NBA_Shots_04_25" target="_blank" rel="noopener">NBA_Shots_04_25</a>.</p>
+  </footer>
+
+  <button class="back-chip" id="back" type="button" hidden></button>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
