@@ -44,8 +44,11 @@ The site only loads the preprocessed files in `data/` (about 8 MB in total; per-
 
 ```bash
 ./scripts/fetch_data.sh          # downloads ~900 MB of raw CSVs into raw/ (git-ignored)
-python3 scripts/build_data.py    # writes data/*.json (standard library only, ~20 s)
+python3 scripts/build_data.py    # writes data/*.json and clean/*.csv (standard library only, ~35 s)
 ```
+
+The same run also writes the cleaned, merged tables before aggregation to `clean/` as CSV; `clean/README.md`
+lists the cleaning steps and columns.
 
 ## Code layout
 

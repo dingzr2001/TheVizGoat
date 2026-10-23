@@ -11,6 +11,9 @@ Outputs (all under data/):
   shots/league.json    hex-binned shot attempts/makes + zone shares per season (2004-2025)
   shots/sample.json    random shot samples from 2004 and 2025 for the opening animation
   shots/teams/<id>.json  the same hex bins per franchise (loaded on demand)
+
+It also writes the cleaned, merged tables before aggregation as CSV under clean/
+(see clean/README.md); clean/shots/ is git-ignored because of its size.
 """
 import csv
 import json
@@ -25,6 +28,7 @@ RAW = ROOT / "raw"
 KAGGLE = RAW / "kaggle"
 SHOTS = RAW / "shots"
 OUT = ROOT / "data"
+CLEAN = ROOT / "clean"
 
 FIRST_3PT_SEASON = 1980   # 1979-80, the NBA's first season with a three-point line
 FIRST_PLAYER_SEASON = 1997  # 1996-97, the coverage window used in our player analysis
@@ -58,6 +62,19 @@ def write_json(path, obj):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False, separators=(",", ":"))
     print(f"  wrote {path.relative_to(ROOT)} ({path.stat().st_size / 1024:.0f} KB)")
+
+
+def write_csv(path, columns, rows):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(columns)
+        w.writerows(rows)
+    print(f"  wrote {path.relative_to(ROOT)} ({path.stat().st_size / 1024:.0f} KB)")
+
+
+def write_records_csv(path, records, columns):
+    write_csv(path, columns, ([r[c] for c in columns] for r in records))
 
 
 # ---------------------------------------------------------------- league + teams
@@ -234,19 +251,36 @@ def pack_season(acc):
     return {"fga": acc["fga"], "fgm": acc["fgm"], "pts": acc["pts"], "zones": acc["zones"], "bins": bins}
 
 
+SHOT_COLUMNS = ["season", "game_id", "game_date", "team_id", "team", "player_id", "player",
+                "quarter", "mins_left", "secs_left", "loc_x", "loc_y", "shot_distance",
+                "shot_type", "made", "points", "basic_zone", "zone", "in_chart"]
+
+
 def build_shots():
     league = {}
     teams = defaultdict(dict)     # team_id -> season -> accumulator
     team_names = defaultdict(dict)  # team_id -> season -> name
     samples = {}
     rng = random.Random(6730)
+    CLEAN.joinpath("shots").mkdir(parents=True, exist_ok=True)
 
     for season in SHOT_SEASONS:
         path = SHOTS / f"NBA_{season}_Shots.csv"
         lg = empty_season()
         season_rows = []
-        with open(path, newline="", encoding="utf-8") as f:
+        seen, dups = set(), 0
+        clean_path = CLEAN / "shots" / f"shots_{season}.csv"
+        with open(path, newline="", encoding="utf-8") as f, \
+                open(clean_path, "w", newline="", encoding="utf-8") as out:
+            clean = csv.writer(out)
+            clean.writerow(SHOT_COLUMNS)
             for r in csv.DictReader(f):
+                # A few rows per season are exact duplicates of another shot.
+                key = tuple(r.values())
+                if key in seen:
+                    dups += 1
+                    continue
+                seen.add(key)
                 x, y = float(r["LOC_X"]), float(r["LOC_Y"])
                 made = r["SHOT_MADE"] == "TRUE"
                 pts = (3 if r["SHOT_TYPE"].startswith("3") else 2) if made else 0
@@ -256,6 +290,12 @@ def build_shots():
                 if tm is None:
                     tm = teams[tid][season] = empty_season()
                 zone = ZONE_OF[r["BASIC_ZONE"]]
+                clean.writerow([
+                    season, r["GAME_ID"], r["GAME_DATE"], tid, NAME_ALIASES.get(r["TEAM_NAME"], r["TEAM_NAME"]),
+                    r["PLAYER_ID"], r["PLAYER_NAME"], r["QUARTER"], r["MINS_LEFT"], r["SECS_LEFT"], x, y,
+                    r["SHOT_DISTANCE"], r["SHOT_TYPE"][:3], int(made), pts, r["BASIC_ZONE"], ZONES[zone],
+                    int(y <= MAX_SHOT_Y),
+                ])
                 for acc in (lg, tm):
                     acc["fga"] += 1
                     acc["fgm"] += made
@@ -274,7 +314,7 @@ def build_shots():
         league[season] = pack_season(lg)
         if season_rows:
             samples[season] = rng.sample(season_rows, 1600)
-        print(f"  shots {season}: {lg['fga']} attempts")
+        print(f"  shots {season}: {lg['fga']} attempts ({dups} duplicate rows dropped)")
 
     write_json(OUT / "shots" / "league.json", {
         "hexRadius": HEX_RADIUS, "zones": ZONES, "seasons": league,
@@ -307,10 +347,17 @@ def main():
     missing = [(t["season"], t["team"]) for t in teams if t["season"] in SHOT_SEASONS and not t["nbaId"]]
     if missing:
         print("  WARNING: team-seasons without a shot-data match:", missing[:10])
+    players, mvps = build_players(), build_mvps()
     write_json(OUT / "league.json", league)
     write_json(OUT / "teams.json", teams)
-    write_json(OUT / "players.json", build_players())
-    write_json(OUT / "mvp.json", build_mvps())
+    write_json(OUT / "players.json", players)
+    write_json(OUT / "mvp.json", mvps)
+
+    print("Writing cleaned tables...")
+    write_records_csv(CLEAN / "league.csv", league, list(league[0]))
+    write_records_csv(CLEAN / "teams.csv", teams, [c for c in teams[0] if c != "shooters"])
+    write_csv(CLEAN / "players.csv", players["columns"], players["rows"])
+    write_records_csv(CLEAN / "mvp.csv", mvps, list(mvps[0]))
 
 
 if __name__ == "__main__":
